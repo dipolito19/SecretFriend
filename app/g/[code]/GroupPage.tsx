@@ -221,18 +221,26 @@ export default function GroupPage({ code }: { code: string }) {
 
       {/* Temas do pote */}
       <div className="card">
-        <h2 style={{ margin: 0 }}>Temas no pote ({view.themes.length})</h2>
-        <p className="muted small" style={{ marginTop: 4 }}>
-          Todos os temas cadastrados até agora. Ninguém sabe quem escreveu cada um, e no sorteio cada pessoa recebe um deles.
-        </p>
-        {view.themes.length === 0 ? (
-          <p className="muted" style={{ marginTop: 8 }}>Nenhum tema ainda.</p>
+        {view.participants.length < 3 ? (
+          <>
+            <h2 style={{ margin: 0 }}>Temas no pote 🔒</h2>
+            <p className="muted small" style={{ marginTop: 4 }}>
+              O pote é revelado quando o grupo tiver pelo menos 3 participantes
+              {` (falta${3 - view.participants.length > 1 ? "m" : ""} ${3 - view.participants.length})`}.
+            </p>
+          </>
         ) : (
-          <ul className="chips">
-            {view.themes.map((t, i) => (
-              <li key={i} className="chip theme-chip">🎁 {t}</li>
-            ))}
-          </ul>
+          <>
+            <h2 style={{ margin: 0 }}>Temas no pote ({view.themes.length})</h2>
+            <p className="muted small" style={{ marginTop: 4 }}>
+              Todos os temas cadastrados até agora. Ninguém sabe quem escreveu cada um, e no sorteio cada pessoa recebe um deles.
+            </p>
+            <ul className="chips">
+              {view.themes.map((t, i) => (
+                <li key={i} className="chip theme-chip">🎁 {t}</li>
+              ))}
+            </ul>
+          </>
         )}
       </div>
 

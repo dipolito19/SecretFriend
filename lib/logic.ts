@@ -40,6 +40,8 @@ export function drawPairs(ids: string[]): Map<string, string> {
   return pairs;
 }
 
+export const THEMES_MIN_PEOPLE = 4;
+
 export function buildView(group: Group, people: Participant[], token: string | null, admin: string | null): GroupView {
   const me = token ? people.find((p) => p.token === token) ?? null : null;
   const target = me && group.drawn_at && me.assigned_to ? people.find((p) => p.id === me.assigned_to) ?? null : null;
@@ -51,8 +53,9 @@ export function buildView(group: Group, people: Participant[], token: string | n
     drawn: !!group.drawn_at,
     isAdmin: !!admin && admin === group.admin_token,
     participants: people.map((p) => ({ id: p.id, nick: p.nick })),
+    // So revela o pote com 3+ pessoas (com menos, daria para adivinhar quem escreveu).
     // Ordem alfabetica: a ordem de cadastro entregaria quem escreveu cada tema.
-    themes: people.map((p) => p.theme).filter(Boolean).sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" })),
+    themes: people.length < THEMES_MIN_PEOPLE ? [] : people.map((p) => p.theme).filter(Boolean).sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" })),
     me: me ? { id: me.id, nick: me.nick, theme: me.theme, avoid: me.avoid } : null,
     match:
       me && target
