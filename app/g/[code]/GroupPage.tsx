@@ -225,8 +225,8 @@ export default function GroupPage({ code }: { code: string }) {
           <>
             <h2 style={{ margin: 0 }}>Temas no pote 🔒</h2>
             <p className="muted small" style={{ marginTop: 4 }}>
-              O pote é revelado quando o grupo tiver pelo menos 3 participantes
-              {` (falta${3 - view.participants.length > 1 ? "m" : ""} ${3 - view.participants.length})`}.
+              O pote é revelado quando o grupo tiver pelo menos 4 participantes
+              {` (falta${4 - view.participants.length > 1 ? "m" : ""} ${4 - view.participants.length})`}.
             </p>
           </>
         ) : (
