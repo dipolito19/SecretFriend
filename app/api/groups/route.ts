@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       code,
       name,
       budget: clean(body.budget, 40) || null,
-      event_date: clean(body.eventDate, 40) || null,
+      event_date: /^\d{2}\/\d{2}$/.test(clean(body.eventDate, 5)) ? clean(body.eventDate, 5) : null,
     });
     return NextResponse.json({ code: group.code, adminToken: group.admin_token });
   }

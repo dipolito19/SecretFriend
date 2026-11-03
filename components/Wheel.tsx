@@ -5,26 +5,15 @@ import { useEffect, useRef, useState } from "react";
 const COLORS = ["#b3261e", "#1f6f4a", "#e0a526", "#2f5d8c", "#c4512d", "#5b8c3a", "#8c3a6b", "#d07a1c"];
 
 type Props = {
-  /** Nicks que aparecem na roleta. */
-  names: string[];
-  /** Indice do nick onde a roleta deve parar. */
-  target: number;
   onDone: () => void;
 };
 
-const MAX_SLICES = 12;
+/** Quantidade de fatias da roleta. Todas mostram "???": o nome so aparece quando ela para. */
+const SLICES = 8;
 
-/** Monta as fatias: se tiver muita gente, mostra uma amostra que sempre inclui o alvo. */
-function slices(names: string[], target: number) {
-  if (names.length <= MAX_SLICES) return { list: names, idx: target };
-  const others = names.filter((_, i) => i !== target).sort(() => Math.random() - 0.5).slice(0, MAX_SLICES - 1);
-  const idx = Math.floor(Math.random() * MAX_SLICES);
-  others.splice(idx, 0, names[target]);
-  return { list: others, idx };
-}
-
-export default function Wheel({ names, target, onDone }: Props) {
-  const [{ list, idx }] = useState(() => slices(names, target));
+export default function Wheel({ onDone }: Props) {
+  const [idx] = useState(() => Math.floor(Math.random() * SLICES));
+  const list = Array.from({ length: SLICES }, () => "???");
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const done = useRef(false);
@@ -63,7 +52,7 @@ export default function Wheel({ names, target, onDone }: Props) {
     <div className="center">
       <div className="wheel-box">
         <div className="pointer" />
-        <svg viewBox="0 0 320 320" role="img" aria-label="Roleta com os nicks do grupo">
+        <svg viewBox="0 0 320 320" role="img" aria-label="Roleta do sorteio">
           <circle cx={C} cy={C} r={R + 6} fill="#2a1f1a" />
           <g
             className="wheel-rot"
@@ -80,7 +69,7 @@ export default function Wheel({ names, target, onDone }: Props) {
               const large = seg > 180 ? 1 : 0;
               const mid = start + seg / 2;
               const [tx, ty] = point(mid, R * 0.6);
-              const label = name.length > 12 ? name.slice(0, 11) + "…" : name;
+              const label = name;
               return (
                 <g key={i}>
                   {n === 1 ? (
@@ -97,7 +86,7 @@ export default function Wheel({ names, target, onDone }: Props) {
                     x={tx}
                     y={ty}
                     fill="#fff"
-                    fontSize={n > 8 ? 12 : 15}
+                    fontSize={20}
                     fontWeight={700}
                     textAnchor="middle"
                     dominantBaseline="middle"

@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { saveAdmin } from "@/lib/client";
+import BudgetRange, { formatBudget, formatDate, validDate } from "@/components/BudgetRange";
 
 export default function Home() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [budget, setBudget] = useState("");
+  const [budget, setBudget] = useState<[number, number]>([50, 100]);
   const [eventDate, setEventDate] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -15,13 +16,17 @@ export default function Home() {
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true);
     setError("");
+    if (!validDate(eventDate)) {
+      setError("Data inválida. Use dia/mês, ex.: 20/12.");
+      return;
+    }
+    setBusy(true);
     try {
       const res = await fetch("/api/groups", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name, budget, eventDate }),
+        body: JSON.stringify({ name, budget: formatBudget(budget), eventDate }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -63,16 +68,18 @@ export default function Home() {
         <p className="muted small">Quem cria o grupo é quem aperta o botão de sortear.</p>
         <label htmlFor="name">Nome do grupo</label>
         <input id="name" required maxLength={60} placeholder="Amigo secreto da firma" value={name} onChange={(e) => setName(e.target.value)} />
-        <div className="row">
-          <div>
-            <label htmlFor="budget">Valor sugerido (opcional)</label>
-            <input id="budget" maxLength={40} placeholder="R$ 50 a R$ 100" value={budget} onChange={(e) => setBudget(e.target.value)} />
-          </div>
-          <div>
-            <label htmlFor="date">Data da troca (opcional)</label>
-            <input id="date" maxLength={40} placeholder="20/12" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
-          </div>
-        </div>
+        <label>Valor sugerido</label>
+        <BudgetRange value={budget} onChange={setBudget} />
+        <label htmlFor="date">Data da troca (opcional)</label>
+        <input
+          id="date"
+          inputMode="numeric"
+          placeholder="dd/mm"
+          maxLength={5}
+          value={eventDate}
+          onChange={(e) => setEventDate(formatDate(e.target.value))}
+          style={{ maxWidth: 140 }}
+        />
         <button className="full" disabled={busy}>{busy ? "Criando..." : "Criar grupo"}</button>
         {error && <p className="error">{error}</p>}
       </form>

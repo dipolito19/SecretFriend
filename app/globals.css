@@ -109,3 +109,30 @@ button.full { width: 100%; margin-top: 16px; }
 .split { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
 @media (prefers-reduced-motion: reduce) { .wheel-rot { transition: none !important; } }
+.range { margin-top: 4px; }
+.range-value { font-weight: 700; color: var(--red); font-size: 18px; margin-bottom: 6px; }
+.range-track { position: relative; height: 28px; }
+.range-track::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 12px; height: 4px;
+  background: var(--line); border-radius: 4px;
+}
+.range-fill { position: absolute; top: 12px; height: 4px; background: var(--red); border-radius: 4px; }
+.range-track input[type="range"] {
+  position: absolute; left: 0; top: 0; width: 100%; height: 28px; margin: 0; padding: 0;
+  background: none; border: 0; pointer-events: none; -webkit-appearance: none; appearance: none; z-index: 2;
+}
+.range-track input[type="range"]:focus { outline: none; }
+.range-track input[type="range"]::-webkit-slider-runnable-track { background: none; height: 28px; }
+.range-track input[type="range"]::-moz-range-track { background: none; }
+.range-track input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; pointer-events: auto; cursor: grab;
+  width: 24px; height: 24px; margin-top: 2px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--red); box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+.range-track input[type="range"]::-moz-range-thumb {
+  pointer-events: auto; cursor: grab;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--red); box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+.range-track input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--gold); }
+.range-scale { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }

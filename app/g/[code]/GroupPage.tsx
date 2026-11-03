@@ -132,8 +132,6 @@ export default function GroupPage({ code }: { code: string }) {
   const shareLink = `${origin}/g/${view.code}`;
   const myLink = token ? `${origin}/g/${view.code}?p=${token}` : "";
   const adminLink = admin ? `${origin}/g/${view.code}?admin=${admin}` : "";
-  const others = view.participants.filter((p) => p.id !== view.me?.id);
-  const matchIndex = view.match ? others.findIndex((p) => p.id === view.match!.id) : -1;
 
   return (
     <>
@@ -153,7 +151,7 @@ export default function GroupPage({ code }: { code: string }) {
             <>
               <h2>Quem você tirou?</h2>
               <p className="muted">Gire a roleta para descobrir. Não deixe ninguém olhar a tela 👀</p>
-              <Wheel names={others.map((p) => p.nick)} target={Math.max(matchIndex, 0)} onDone={onRevealed} />
+              <Wheel onDone={onRevealed} />
             </>
           ) : (
             <>
