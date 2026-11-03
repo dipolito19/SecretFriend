@@ -6,6 +6,8 @@ export type Group = {
   event_date: string | null;
   admin_token: string;
   drawn_at: string | null;
+  /** Quando o organizador revelou o pote de temas (null = ainda escondido). */
+  themes_revealed_at: string | null;
   created_at: string;
 };
 
@@ -33,7 +35,9 @@ export type GroupView = {
   drawn: boolean;
   isAdmin: boolean;
   participants: { id: string; nick: string }[];
-  /** Temas do pote, em ordem alfabetica (sem dizer quem escreveu). */
+  /** O organizador ja revelou o pote? */
+  themesRevealed: boolean;
+  /** Temas do pote, em ordem alfabetica (sem dizer quem escreveu). Vazio enquanto nao revelado. */
   themes: string[];
   me: (Wishes & { id: string }) | null;
   /** Quem voce tirou (com as regras dessa pessoa) e o tema sorteado para o presente. */

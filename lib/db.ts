@@ -12,6 +12,8 @@ export interface Store {
   addParticipant(p: Omit<Participant, "id" | "token" | "assigned_to" | "assigned_theme" | "created_at">): Promise<Participant>;
   updateParticipant(id: string, fields: Partial<Participant>): Promise<void>;
   deleteParticipant(id: string): Promise<void>;
+  /** Revela o pote de temas do grupo. */
+  revealThemes(groupId: string): Promise<void>;
   /** Marca o grupo como sorteado; retorna false se ja tinha sido sorteado. */
   markDrawn(groupId: string): Promise<boolean>;
 }
@@ -47,6 +49,9 @@ function supabaseStore(client: SupabaseClient): Store {
     async deleteParticipant(id) {
       check(await client.from("participants").delete().eq("id", id));
     },
+    async revealThemes(groupId) {
+      check(await client.from("groups").update({ themes_revealed_at: new Date().toISOString() }).eq("id", groupId));
+    },
     async markDrawn(groupId) {
       const data = check(
         await client
@@ -67,7 +72,7 @@ function memoryStore(): Store {
   const now = () => new Date().toISOString();
   return {
     async createGroup(input) {
-      const group: Group = { ...input, id: crypto.randomUUID(), admin_token: crypto.randomUUID(), drawn_at: null, created_at: now() };
+      const group: Group = { ...input, id: crypto.randomUUID(), admin_token: crypto.randomUUID(), drawn_at: null, themes_revealed_at: null, created_at: now() };
       mem.groups.push(group);
       return group;
     },
@@ -93,6 +98,10 @@ function memoryStore(): Store {
     },
     async deleteParticipant(id) {
       mem.participants = mem.participants.filter((x) => x.id !== id);
+    },
+    async revealThemes(groupId) {
+      const group = mem.groups.find((x) => x.id === groupId);
+      if (group && !group.themes_revealed_at) group.themes_revealed_at = now();
     },
     async markDrawn(groupId) {
       const group = mem.groups.find((x) => x.id === groupId);

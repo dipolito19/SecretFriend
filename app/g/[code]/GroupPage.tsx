@@ -20,6 +20,7 @@ export default function GroupPage({ code }: { code: string }) {
   const [revealed, setRevealed] = useState(false);
   const [drawError, setDrawError] = useState("");
   const [drawing, setDrawing] = useState(false);
+  const [revealing, setRevealing] = useState(false);
   const [origin, setOrigin] = useState("");
 
   // Le tokens do link (?p= / ?admin=) e do navegador.
@@ -89,6 +90,21 @@ export default function GroupPage({ code }: { code: string }) {
       setToken(null);
     } else {
       refresh();
+    }
+  }
+
+  async function revealThemes() {
+    if (!view) return;
+    if (!confirm(`Revelar o pote com ${view.participants.length} temas para todo mundo? Não dá para esconder de novo.`)) return;
+    setRevealing(true);
+    setDrawError("");
+    try {
+      await api(`/api/groups/${code}/reveal`, { method: "POST", admin });
+      await refresh();
+    } catch (e) {
+      setDrawError((e as Error).message);
+    } finally {
+      setRevealing(false);
     }
   }
 
@@ -221,12 +237,11 @@ export default function GroupPage({ code }: { code: string }) {
 
       {/* Temas do pote */}
       <div className="card">
-        {view.participants.length < 3 ? (
+        {!view.themesRevealed ? (
           <>
             <h2 style={{ margin: 0 }}>Temas no pote 🔒</h2>
             <p className="muted small" style={{ marginTop: 4 }}>
-              O pote é revelado quando o grupo tiver pelo menos 4 participantes
-              {` (falta${4 - view.participants.length > 1 ? "m" : ""} ${4 - view.participants.length})`}.
+              O organizador vai revelar o pote quando todo mundo tiver entrado.
             </p>
           </>
         ) : (
@@ -288,6 +303,11 @@ export default function GroupPage({ code }: { code: string }) {
               <p className="muted small">
                 Quando todo mundo tiver entrado, sorteie. Cada pessoa recebe um amigo e um tema aleatórios. Ninguém tira a si mesmo nem o próprio tema, e nem você vê o resultado.
               </p>
+              {!view.themesRevealed && (
+                <button className="full green" onClick={revealThemes} disabled={revealing || view.participants.length < 3}>
+                  {revealing ? "Revelando..." : "🔓 Revelar pote de temas"}
+                </button>
+              )}
               <button className="full" onClick={draw} disabled={drawing || view.participants.length < 3}>
                 {drawing ? "Sorteando..." : "🎲 Fazer o sorteio"}
               </button>

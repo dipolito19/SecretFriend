@@ -10,6 +10,7 @@ create table if not exists public.groups (
   event_date   text,
   admin_token  uuid not null default gen_random_uuid(),
   drawn_at     timestamptz,
+  themes_revealed_at timestamptz,
   created_at   timestamptz not null default now()
 );
 
