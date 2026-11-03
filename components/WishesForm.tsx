@@ -14,9 +14,7 @@ type Props = {
 export default function WishesForm({ initial = {}, nickLocked, submitLabel, onSubmit, onCancel }: Props) {
   const [w, setW] = useState<Wishes>({
     nick: initial.nick ?? "",
-    category_1: initial.category_1 ?? "",
-    category_2: initial.category_2 ?? "",
-    category_3: initial.category_3 ?? "",
+    theme: initial.theme ?? "",
     avoid: initial.avoid ?? "",
   });
   const [busy, setBusy] = useState(false);
@@ -42,12 +40,13 @@ export default function WishesForm({ initial = {}, nickLocked, submitLabel, onSu
       <label htmlFor="nick">Seu nick</label>
       <input id="nick" required minLength={2} maxLength={30} placeholder="Como o grupo te conhece" value={w.nick} onChange={set("nick")} disabled={nickLocked} />
 
-      <label>3 categorias de presente que você gostaria de ganhar</label>
-      <input aria-label="Categoria 1" required maxLength={60} placeholder="Ex.: livros de fantasia" value={w.category_1} onChange={set("category_1")} />
-      <input aria-label="Categoria 2" required maxLength={60} placeholder="Ex.: café especial" value={w.category_2} onChange={set("category_2")} style={{ marginTop: 8 }} />
-      <input aria-label="Categoria 3" required maxLength={60} placeholder="Ex.: coisas de cozinha" value={w.category_3} onChange={set("category_3")} style={{ marginTop: 8 }} />
+      <label htmlFor="theme">Um tema de presente</label>
+      <input id="theme" required minLength={2} maxLength={60} placeholder="Ex.: algo de cozinha" value={w.theme} onChange={set("theme")} disabled={nickLocked} />
+      <p className="muted small" style={{ margin: "4px 0 0" }}>
+        Os temas de todo mundo vão para um pote e são sorteados junto com as pessoas, então seu tema vai para outra pessoa.
+      </p>
 
-      <label htmlFor="avoid">O que evitar (regras)</label>
+      <label htmlFor="avoid">O que evitar no seu presente (regras)</label>
       <textarea id="avoid" maxLength={500} placeholder="Ex.: nada de chocolate (sou alérgico), roupas não, sem bebida alcoólica" value={w.avoid} onChange={set("avoid")} />
 
       <div className="row" style={{ marginTop: 16 }}>

@@ -9,7 +9,7 @@ export interface Store {
   createGroup(g: { code: string; name: string; budget: string | null; event_date: string | null }): Promise<Group>;
   getGroup(code: string): Promise<Group | null>;
   listParticipants(groupId: string): Promise<Participant[]>;
-  addParticipant(p: Omit<Participant, "id" | "token" | "assigned_to" | "created_at">): Promise<Participant>;
+  addParticipant(p: Omit<Participant, "id" | "token" | "assigned_to" | "assigned_theme" | "created_at">): Promise<Participant>;
   updateParticipant(id: string, fields: Partial<Participant>): Promise<void>;
   deleteParticipant(id: string): Promise<void>;
   /** Marca o grupo como sorteado; retorna false se ja tinha sido sorteado. */
@@ -80,7 +80,7 @@ function memoryStore(): Store {
     async addParticipant(input) {
       if (mem.participants.some((p) => p.group_id === input.group_id && p.nick.toLowerCase() === input.nick.toLowerCase()))
         throw new DuplicateNickError("nick");
-      const p: Participant = { ...input, id: crypto.randomUUID(), token: crypto.randomUUID(), assigned_to: null, created_at: now() };
+      const p: Participant = { ...input, id: crypto.randomUUID(), token: crypto.randomUUID(), assigned_to: null, assigned_theme: null, created_at: now() };
       mem.participants.push(p);
       return p;
     },

@@ -14,7 +14,16 @@ export async function POST(req: Request, ctx: { params: Promise<{ code: string }
   if (!(await store.markDrawn(group.id))) return fail("O sorteio já foi feito.", 409);
   // Relista depois de travar o grupo, para incluir quem entrou no ultimo segundo.
   const final = await store.listParticipants(group.id);
-  const pairs = drawPairs(final.map((p) => p.id));
-  await Promise.all([...pairs].map(([giver, receiver]) => store.updateParticipant(giver, { assigned_to: receiver })));
+  const ids = final.map((p) => p.id);
+  // Sorteio 1: quem tira quem.
+  const pairs = drawPairs(ids);
+  // Sorteio 2 (independente): de quem vem o tema. Ninguem recebe o proprio tema.
+  const themeFrom = drawPairs(ids);
+  const themeOf = new Map(final.map((p) => [p.id, p.theme]));
+  await Promise.all(
+    [...pairs].map(([giver, receiver]) =>
+      store.updateParticipant(giver, { assigned_to: receiver, assigned_theme: themeOf.get(themeFrom.get(giver)!) ?? "" })
+    )
+  );
   return NextResponse.json({ ok: true });
 }

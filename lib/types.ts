@@ -13,16 +13,17 @@ export type Participant = {
   id: string;
   group_id: string;
   nick: string;
-  category_1: string;
-  category_2: string;
-  category_3: string;
+  /** Tema de presente que a pessoa escreveu (entra no "pote" de temas do sorteio). */
+  theme: string;
   avoid: string;
   token: string;
   assigned_to: string | null;
+  /** Tema sorteado para o presente que esta pessoa vai dar. */
+  assigned_theme: string | null;
   created_at: string;
 };
 
-export type Wishes = Pick<Participant, "nick" | "category_1" | "category_2" | "category_3" | "avoid">;
+export type Wishes = Pick<Participant, "nick" | "theme" | "avoid">;
 
 export type GroupView = {
   code: string;
@@ -32,6 +33,9 @@ export type GroupView = {
   drawn: boolean;
   isAdmin: boolean;
   participants: { id: string; nick: string }[];
+  /** Temas do pote, em ordem alfabetica (sem dizer quem escreveu). */
+  themes: string[];
   me: (Wishes & { id: string }) | null;
-  match: (Wishes & { id: string }) | null;
+  /** Quem voce tirou (com as regras dessa pessoa) e o tema sorteado para o presente. */
+  match: { id: string; nick: string; avoid: string; theme: string } | null;
 };

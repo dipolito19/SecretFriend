@@ -18,13 +18,11 @@ export const clean = (v: unknown, max: number) =>
 /** Valida o formulario do participante. Retorna mensagem de erro ou os dados limpos. */
 export function parseWishes(body: Record<string, unknown>): Wishes | string {
   const nick = clean(body.nick, 30);
-  const category_1 = clean(body.category_1, 60);
-  const category_2 = clean(body.category_2, 60);
-  const category_3 = clean(body.category_3, 60);
+  const theme = clean(body.theme, 60);
   const avoid = typeof body.avoid === "string" ? body.avoid.trim().slice(0, 500) : "";
   if (nick.length < 2) return "Escolha um nick com pelo menos 2 letras.";
-  if (!category_1 || !category_2 || !category_3) return "Preencha as 3 categorias de presente.";
-  return { nick, category_1, category_2, category_3, avoid };
+  if (theme.length < 2) return "Escreva um tema de presente.";
+  return { nick, theme, avoid };
 }
 
 /**
@@ -42,18 +40,9 @@ export function drawPairs(ids: string[]): Map<string, string> {
   return pairs;
 }
 
-const wishes = (p: Participant) => ({
-  id: p.id,
-  nick: p.nick,
-  category_1: p.category_1,
-  category_2: p.category_2,
-  category_3: p.category_3,
-  avoid: p.avoid,
-});
-
 export function buildView(group: Group, people: Participant[], token: string | null, admin: string | null): GroupView {
   const me = token ? people.find((p) => p.token === token) ?? null : null;
-  const match = me && group.drawn_at && me.assigned_to ? people.find((p) => p.id === me.assigned_to) ?? null : null;
+  const target = me && group.drawn_at && me.assigned_to ? people.find((p) => p.id === me.assigned_to) ?? null : null;
   return {
     code: group.code,
     name: group.name,
@@ -62,8 +51,13 @@ export function buildView(group: Group, people: Participant[], token: string | n
     drawn: !!group.drawn_at,
     isAdmin: !!admin && admin === group.admin_token,
     participants: people.map((p) => ({ id: p.id, nick: p.nick })),
-    me: me ? wishes(me) : null,
-    match: match ? wishes(match) : null,
+    // Ordem alfabetica: a ordem de cadastro entregaria quem escreveu cada tema.
+    themes: people.map((p) => p.theme).filter(Boolean).sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" })),
+    me: me ? { id: me.id, nick: me.nick, theme: me.theme, avoid: me.avoid } : null,
+    match:
+      me && target
+        ? { id: target.id, nick: target.nick, avoid: target.avoid, theme: me.assigned_theme ?? "" }
+        : null,
   };
 }
 

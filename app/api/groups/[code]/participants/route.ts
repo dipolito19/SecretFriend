@@ -42,7 +42,11 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (!me) return fail("Participante não encontrado.", 403);
   const parsed = parseWishes(await req.json().catch(() => ({})));
   if (typeof parsed === "string") return fail(parsed);
-  if (group.drawn_at) parsed.nick = me.nick;
+  // Depois do sorteio so as regras podem mudar: nick e tema ja foram sorteados.
+  if (group.drawn_at) {
+    parsed.nick = me.nick;
+    parsed.theme = me.theme;
+  }
   try {
     await store.updateParticipant(me.id, parsed);
     return NextResponse.json({ ok: true });

@@ -17,12 +17,11 @@ create table if not exists public.participants (
   id            uuid primary key default gen_random_uuid(),
   group_id      uuid not null references public.groups(id) on delete cascade,
   nick          text not null,
-  category_1    text not null,
-  category_2    text not null,
-  category_3    text not null,
+  theme         text not null default '',
   avoid         text not null default '',
   token         uuid not null default gen_random_uuid() unique,
   assigned_to   uuid references public.participants(id) on delete set null,
+  assigned_theme text,
   created_at    timestamptz not null default now()
 );
 
@@ -34,3 +33,7 @@ create index if not exists participants_group_idx on public.participants (group_
 -- RLS ligado e sem policies = ninguem consegue ler/escrever com a chave publica.
 alter table public.groups enable row level security;
 alter table public.participants enable row level security;
+
+-- Sem acesso pela chave publica.
+revoke all on table public.groups from anon, authenticated;
+revoke all on table public.participants from anon, authenticated;

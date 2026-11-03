@@ -6,9 +6,9 @@ Site simples (Next.js + Supabase, pronto para a Vercel) para organizar amigo sec
 
 1. Alguém cria um grupo (nome, valor sugerido e data opcionais) e vira o organizador.
 2. Manda o link `/g/CODIGO` para a galera.
-3. Cada pessoa entra com um **nick**, **3 categorias de presente** que gostaria de ganhar e **regras do que evitar**.
+3. Cada pessoa entra com um **nick**, **um tema de presente** (que vai para o pote de temas) e **regras do que evitar**.
 4. O organizador clica em **Fazer o sorteio** (mínimo 3 pessoas). Ninguém tira a si mesmo e nem o organizador vê os pares.
-5. Cada pessoa abre o grupo e **gira a roleta**, que para no seu amigo secreto e mostra os desejos e as regras dele.
+5. Cada pessoa abre o grupo e **gira a roleta**: recebe um amigo aleatório e um tema aleatório (nunca o próprio), mais as regras do amigo.
 
 Sem login: a identidade fica salva no navegador. Cada pessoa tem um **link pessoal** (e o organizador um link de organizador) para abrir em outro aparelho.
 

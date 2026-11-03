@@ -50,7 +50,7 @@ export default function Home() {
         <div className="emoji">🎡🎁</div>
         <h1>Roleta do Amigo Secreto</h1>
         <p className="muted">
-          Sem login. Cada pessoa escolhe um nick, conta 3 tipos de presente que gostaria de ganhar e o que é
+          Sem login. Cada pessoa escolhe um nick, escreve um tema de presente e o que é
           melhor evitar. Depois a roleta sorteia quem tira quem.
         </p>
       </div>

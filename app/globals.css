@@ -136,3 +136,9 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
 }
 .range-track input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--gold); }
 .range-scale { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.reveal .theme {
+  display: inline-block; font-size: 22px; font-weight: 700; color: var(--green);
+  background: #e7f0e6; border-radius: 12px; padding: 8px 16px; margin-bottom: 8px; word-break: break-word;
+}
+.wishlist.plain li::before { content: "🎁 "; }
+.chip.theme-chip { background: #e7f0e6; border-color: #cfe1cd; color: var(--green); font-weight: 600; }

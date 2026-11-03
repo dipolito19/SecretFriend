@@ -77,7 +77,7 @@ export default function GroupPage({ code }: { code: string }) {
 
   async function remove(id: string | null, nick: string) {
     const isMe = id === null;
-    if (!confirm(isMe ? "Sair do grupo? Seus desejos serão apagados." : `Remover ${nick} do grupo?`)) return;
+    if (!confirm(isMe ? "Sair do grupo? Seu tema e suas regras serão apagados." : `Remover ${nick} do grupo?`)) return;
     await api(`/api/groups/${code}/participants`, {
       method: "DELETE",
       body: isMe ? {} : { id },
@@ -149,7 +149,7 @@ export default function GroupPage({ code }: { code: string }) {
         <div className="card reveal">
           {!revealed ? (
             <>
-              <h2>Quem você tirou?</h2>
+              <h2>Quem e qual tema você tirou?</h2>
               <p className="muted">Gire a roleta para descobrir. Não deixe ninguém olhar a tela 👀</p>
               <Wheel onDone={onRevealed} />
             </>
@@ -157,18 +157,14 @@ export default function GroupPage({ code }: { code: string }) {
             <>
               <p className="muted">Seu amigo secreto é</p>
               <div className="nick">🎉 {view.match.nick}</div>
+              <p className="muted" style={{ marginBottom: 4 }}>e o tema do presente é</p>
+              <div className="theme">🎁 {view.match.theme}</div>
               <div style={{ textAlign: "left" }}>
-                <h3>Gostaria de ganhar</h3>
-                <ol className="wishlist">
-                  <li>{view.match.category_1}</li>
-                  <li>{view.match.category_2}</li>
-                  <li>{view.match.category_3}</li>
-                </ol>
-                <h3 style={{ marginTop: 16 }}>Evite</h3>
+                <h3 style={{ marginTop: 16 }}>Regras de {view.match.nick}: evite</h3>
                 <div className="avoid">{view.match.avoid || "Nenhuma regra, pode ousar 😄"}</div>
               </div>
               <p className="muted small" style={{ marginTop: 12 }}>
-                Se {view.match.nick} mudar os desejos, você vê a versão nova aqui.
+                Se {view.match.nick} mudar as regras, você vê a versão nova aqui.
               </p>
             </>
           )}
@@ -188,7 +184,7 @@ export default function GroupPage({ code }: { code: string }) {
       {!view.drawn && !view.me && (
         <div className="card">
           <h2>Entrar no grupo</h2>
-          <p className="muted small">Sem login: só um nick e o que você curte.</p>
+          <p className="muted small">Sem login: só um nick, um tema de presente e o que evitar.</p>
           <WishesForm submitLabel="Entrar no amigo secreto" onSubmit={join} />
         </div>
       )}
@@ -197,7 +193,7 @@ export default function GroupPage({ code }: { code: string }) {
       {view.me && (
         <div className="card">
           <div className="split">
-            <h2 style={{ margin: 0 }}>Seus desejos</h2>
+            <h2 style={{ margin: 0 }}>Sua participação</h2>
             {!editing && <button className="link" onClick={() => setEditing(true)}>Editar</button>}
           </div>
           {editing ? (
@@ -211,11 +207,9 @@ export default function GroupPage({ code }: { code: string }) {
           ) : (
             <>
               <p className="muted small" style={{ marginTop: 6 }}>Você entrou como <b>{view.me.nick}</b></p>
-              <ol className="wishlist">
-                <li>{view.me.category_1}</li>
-                <li>{view.me.category_2}</li>
-                <li>{view.me.category_3}</li>
-              </ol>
+              <ul className="wishlist plain">
+                <li>{view.me.theme}</li>
+              </ul>
               {view.me.avoid && <div className="avoid" style={{ marginTop: 8 }}>🚫 {view.me.avoid}</div>}
             </>
           )}
@@ -224,6 +218,23 @@ export default function GroupPage({ code }: { code: string }) {
           <CopyField value={myLink} />
         </div>
       )}
+
+      {/* Temas do pote */}
+      <div className="card">
+        <h2 style={{ margin: 0 }}>Temas no pote ({view.themes.length})</h2>
+        <p className="muted small" style={{ marginTop: 4 }}>
+          Todos os temas cadastrados até agora. Ninguém sabe quem escreveu cada um, e no sorteio cada pessoa recebe um deles.
+        </p>
+        {view.themes.length === 0 ? (
+          <p className="muted" style={{ marginTop: 8 }}>Nenhum tema ainda.</p>
+        ) : (
+          <ul className="chips">
+            {view.themes.map((t, i) => (
+              <li key={i} className="chip theme-chip">🎁 {t}</li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Participantes */}
       <div className="card">
@@ -263,11 +274,11 @@ export default function GroupPage({ code }: { code: string }) {
         <div className="card">
           <h2>Área do organizador</h2>
           {view.drawn ? (
-            <p className="ok">Sorteio feito! Cada pessoa abre o grupo e gira a roleta para ver quem tirou.</p>
+            <p className="ok">Sorteio feito! Cada pessoa abre o grupo e gira a roleta para ver quem e qual tema tirou.</p>
           ) : (
             <>
               <p className="muted small">
-                Quando todo mundo tiver entrado, sorteie. Ninguém tira a si mesmo e nem você vê os pares.
+                Quando todo mundo tiver entrado, sorteie. Cada pessoa recebe um amigo e um tema aleatórios. Ninguém tira a si mesmo nem o próprio tema, e nem você vê o resultado.
               </p>
               <button className="full" onClick={draw} disabled={drawing || view.participants.length < 3}>
                 {drawing ? "Sorteando..." : "🎲 Fazer o sorteio"}
