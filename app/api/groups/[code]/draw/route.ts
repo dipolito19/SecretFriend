@@ -17,8 +17,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ code: string }
   const ids = final.map((p) => p.id);
   // Sorteio 1: quem tira quem.
   const pairs = drawPairs(ids);
-  // Sorteio 2 (independente): de quem vem o tema. Ninguem recebe o proprio tema.
-  const themeFrom = drawPairs(ids);
+  // Sorteio 2: de quem vem o tema. Ninguem recebe o proprio tema, e o tema tambem
+  // nao pode ser o que a pessoa sorteada escreveu (senao o tema "entrega" quem escreveu).
+  let themeFrom = drawPairs(ids);
+  for (let i = 0; i < 200 && ids.some((g) => themeFrom.get(g) === pairs.get(g)); i++) themeFrom = drawPairs(ids);
   const themeOf = new Map(final.map((p) => [p.id, p.theme]));
   await Promise.all(
     [...pairs].map(([giver, receiver]) =>
