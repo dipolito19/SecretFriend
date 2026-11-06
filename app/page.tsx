@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { saveAdmin } from "@/lib/client";
+import PinInput from "@/components/PinInput";
 import BudgetRange, { formatBudget, formatDate, validDate } from "@/components/BudgetRange";
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
   const [name, setName] = useState("");
   const [budget, setBudget] = useState<[number, number]>([50, 100]);
   const [eventDate, setEventDate] = useState("");
+  const [adminPin, setAdminPin] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -26,7 +28,7 @@ export default function Home() {
       const res = await fetch("/api/groups", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name, budget: formatBudget(budget), eventDate }),
+        body: JSON.stringify({ name, budget: formatBudget(budget), eventDate, adminPin }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -80,6 +82,11 @@ export default function Home() {
           onChange={(e) => setEventDate(formatDate(e.target.value))}
           style={{ maxWidth: 140 }}
         />
+        <label htmlFor="adminPin">PIN do organizador (4 números)</label>
+        <PinInput id="adminPin" value={adminPin} onChange={setAdminPin} required />
+        <p className="muted small" style={{ margin: "4px 0 0" }}>
+          Serve para você entrar como organizador de outro aparelho. Não é o PIN de participante.
+        </p>
         <button className="full" disabled={busy}>{busy ? "Criando..." : "Criar grupo"}</button>
         {error && <p className="error">{error}</p>}
       </form>

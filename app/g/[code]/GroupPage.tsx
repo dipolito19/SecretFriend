@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import CopyField from "@/components/CopyField";
 import Wheel from "@/components/Wheel";
-import WishesForm from "@/components/WishesForm";
+import WishesForm, { type WishesWithPin } from "@/components/WishesForm";
+import LoginCard from "@/components/LoginCard";
+import PinInput from "@/components/PinInput";
 import { api, loadAdmin, loadToken, saveAdmin, saveToken } from "@/lib/client";
-import type { GroupView, Wishes } from "@/lib/types";
+import type { GroupView } from "@/lib/types";
 
 const revealKey = (code: string) => `roleta:r:${code}`;
 
@@ -21,6 +23,7 @@ export default function GroupPage({ code }: { code: string }) {
   const [drawError, setDrawError] = useState("");
   const [drawing, setDrawing] = useState(false);
   const [revealing, setRevealing] = useState(false);
+  const [newAdminPin, setNewAdminPin] = useState("");
   const [origin, setOrigin] = useState("");
 
   // Le tokens do link (?p= / ?admin=) e do navegador.
@@ -64,13 +67,41 @@ export default function GroupPage({ code }: { code: string }) {
     return () => clearInterval(t);
   }, [view, refresh]);
 
-  async function join(w: Wishes) {
+  function loginParticipant(t: string) {
+    saveToken(code, t);
+    setToken(t);
+  }
+
+  function loginOrganizer(a: string) {
+    saveAdmin(code, a);
+    setAdmin(a);
+  }
+
+  function logout() {
+    if (!confirm("Sair deste aparelho? Para voltar, use seu nick e PIN.")) return;
+    saveToken(code, null);
+    setToken(null);
+  }
+
+  async function setOrganizerPin(e: React.FormEvent) {
+    e.preventDefault();
+    setDrawError("");
+    try {
+      await api(`/api/groups/${code}`, { method: "PATCH", body: { adminPin: newAdminPin }, admin });
+      setNewAdminPin("");
+      await refresh();
+    } catch (err) {
+      setDrawError((err as Error).message);
+    }
+  }
+
+  async function join(w: WishesWithPin) {
     const { token: t } = await api<{ token: string }>(`/api/groups/${code}/participants`, { method: "POST", body: w });
     saveToken(code, t);
     setToken(t);
   }
 
-  async function save(w: Wishes) {
+  async function save(w: WishesWithPin) {
     await api(`/api/groups/${code}/participants`, { method: "PATCH", body: w, token });
     setEditing(false);
     await refresh();
@@ -190,9 +221,7 @@ export default function GroupPage({ code }: { code: string }) {
       {view.drawn && !view.me && (
         <div className="card center">
           <h2>O sorteio já foi feito</h2>
-          <p className="muted">
-            Se você participou por outro aparelho, abra o seu link pessoal para ver quem tirou.
-          </p>
+          <p className="muted">Entre com seu nick e PIN para ver quem e qual tema você tirou.</p>
         </div>
       )}
 
@@ -201,8 +230,21 @@ export default function GroupPage({ code }: { code: string }) {
         <div className="card">
           <h2>Entrar no grupo</h2>
           <p className="muted small">Sem login: só um nick, um tema de presente e o que evitar.</p>
-          <WishesForm submitLabel="Entrar no amigo secreto" onSubmit={join} />
+          <WishesForm pinMode="new" submitLabel="Entrar no amigo secreto" onSubmit={join} />
         </div>
+      )}
+
+      {/* Entrar de outro aparelho */}
+      {(!view.me || !view.isAdmin) && (
+        <LoginCard
+          key={`${!!view.me}-${view.isAdmin}`}
+          code={view.code}
+          participant={!view.me}
+          organizer={!view.isAdmin}
+          startOpen={view.drawn}
+          onParticipant={loginParticipant}
+          onOrganizer={loginOrganizer}
+        />
       )}
 
       {/* Meus desejos */}
@@ -216,6 +258,7 @@ export default function GroupPage({ code }: { code: string }) {
             <WishesForm
               initial={view.me}
               nickLocked={view.drawn}
+              pinMode="change"
               submitLabel="Salvar"
               onSubmit={save}
               onCancel={() => setEditing(false)}
@@ -230,8 +273,21 @@ export default function GroupPage({ code }: { code: string }) {
             </>
           )}
           <hr />
-          <p className="small"><b>Seu link pessoal.</b> Guarde para abrir em outro aparelho. Não compartilhe: ele mostra quem você tirou.</p>
-          <CopyField value={myLink} />
+          {view.me.hasPin ? (
+            <p className="small">
+              🔑 Para entrar de outro aparelho, use seu nick <b>{view.me.nick}</b> e seu PIN.
+            </p>
+          ) : (
+            <p className="small">
+              ⚠️ Você ainda não tem PIN. Clique em <b>Editar</b> e crie um para entrar de outros aparelhos.
+            </p>
+          )}
+          <details className="small">
+            <summary className="muted">Ou use seu link pessoal</summary>
+            <p className="muted small" style={{ marginTop: 6 }}>Não compartilhe: ele mostra quem você tirou.</p>
+            <CopyField value={myLink} />
+          </details>
+          <button className="linkish small" style={{ marginTop: 12 }} onClick={logout}>Sair deste aparelho</button>
         </div>
       )}
 
@@ -316,8 +372,21 @@ export default function GroupPage({ code }: { code: string }) {
             </>
           )}
           <hr />
-          <p className="small"><b>Link de organizador</b> (para abrir em outro aparelho, não compartilhe):</p>
-          <CopyField value={adminLink} />
+          {view.hasAdminPin ? (
+            <p className="small">🔑 Para entrar como organizador em outro aparelho, use “Sou o organizador” e o PIN do organizador.</p>
+          ) : (
+            <form onSubmit={setOrganizerPin}>
+              <p className="small">⚠️ Este grupo ainda não tem PIN de organizador. Crie um para entrar de outros aparelhos:</p>
+              <div className="copy">
+                <PinInput id="new-admin-pin" value={newAdminPin} onChange={setNewAdminPin} required />
+                <button disabled={newAdminPin.length !== 4}>Salvar PIN</button>
+              </div>
+            </form>
+          )}
+          <details className="small" style={{ marginTop: 8 }}>
+            <summary className="muted">Ou use o link de organizador</summary>
+            <CopyField value={adminLink} />
+          </details>
         </div>
       )}
 

@@ -6,12 +6,13 @@ import type { Group, Participant } from "./types";
  * Sem variaveis de ambiente, cai num banco em memoria para desenvolvimento local.
  */
 export interface Store {
-  createGroup(g: { code: string; name: string; budget: string | null; event_date: string | null }): Promise<Group>;
+  createGroup(g: { code: string; name: string; budget: string | null; event_date: string | null; admin_pin_hash: string | null }): Promise<Group>;
   getGroup(code: string): Promise<Group | null>;
   listParticipants(groupId: string): Promise<Participant[]>;
-  addParticipant(p: Omit<Participant, "id" | "token" | "assigned_to" | "assigned_theme" | "created_at">): Promise<Participant>;
+  addParticipant(p: Omit<Participant, "id" | "token" | "assigned_to" | "assigned_theme" | "failed_logins" | "locked_until" | "created_at">): Promise<Participant>;
   updateParticipant(id: string, fields: Partial<Participant>): Promise<void>;
   deleteParticipant(id: string): Promise<void>;
+  updateGroup(id: string, fields: Partial<Group>): Promise<void>;
   /** Revela o pote de temas do grupo. */
   revealThemes(groupId: string): Promise<void>;
   /** Marca o grupo como sorteado; retorna false se ja tinha sido sorteado. */
@@ -49,6 +50,9 @@ function supabaseStore(client: SupabaseClient): Store {
     async deleteParticipant(id) {
       check(await client.from("participants").delete().eq("id", id));
     },
+    async updateGroup(id, fields) {
+      check(await client.from("groups").update(fields).eq("id", id));
+    },
     async revealThemes(groupId) {
       check(await client.from("groups").update({ themes_revealed_at: new Date().toISOString() }).eq("id", groupId));
     },
@@ -72,7 +76,7 @@ function memoryStore(): Store {
   const now = () => new Date().toISOString();
   return {
     async createGroup(input) {
-      const group: Group = { ...input, id: crypto.randomUUID(), admin_token: crypto.randomUUID(), drawn_at: null, themes_revealed_at: null, created_at: now() };
+      const group: Group = { ...input, id: crypto.randomUUID(), admin_token: crypto.randomUUID(), drawn_at: null, themes_revealed_at: null, admin_failed_logins: 0, admin_locked_until: null, created_at: now() };
       mem.groups.push(group);
       return group;
     },
@@ -85,7 +89,7 @@ function memoryStore(): Store {
     async addParticipant(input) {
       if (mem.participants.some((p) => p.group_id === input.group_id && p.nick.toLowerCase() === input.nick.toLowerCase()))
         throw new DuplicateNickError("nick");
-      const p: Participant = { ...input, id: crypto.randomUUID(), token: crypto.randomUUID(), assigned_to: null, assigned_theme: null, created_at: now() };
+      const p: Participant = { ...input, id: crypto.randomUUID(), token: crypto.randomUUID(), assigned_to: null, assigned_theme: null, failed_logins: 0, locked_until: null, created_at: now() };
       mem.participants.push(p);
       return p;
     },
@@ -98,6 +102,10 @@ function memoryStore(): Store {
     },
     async deleteParticipant(id) {
       mem.participants = mem.participants.filter((x) => x.id !== id);
+    },
+    async updateGroup(id, fields) {
+      const group = mem.groups.find((x) => x.id === id);
+      if (group) Object.assign(group, fields);
     },
     async revealThemes(groupId) {
       const group = mem.groups.find((x) => x.id === groupId);

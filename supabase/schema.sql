@@ -11,6 +11,9 @@ create table if not exists public.groups (
   admin_token  uuid not null default gen_random_uuid(),
   drawn_at     timestamptz,
   themes_revealed_at timestamptz,
+  admin_pin_hash text,
+  admin_failed_logins int not null default 0,
+  admin_locked_until timestamptz,
   created_at   timestamptz not null default now()
 );
 
@@ -23,6 +26,9 @@ create table if not exists public.participants (
   token         uuid not null default gen_random_uuid() unique,
   assigned_to   uuid references public.participants(id) on delete set null,
   assigned_theme text,
+  pin_hash      text,
+  failed_logins int not null default 0,
+  locked_until  timestamptz,
   created_at    timestamptz not null default now()
 );
 

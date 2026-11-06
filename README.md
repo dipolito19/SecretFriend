@@ -10,7 +10,7 @@ Site simples (Next.js + Supabase, pronto para a Vercel) para organizar amigo sec
 4. O organizador clica em **Fazer o sorteio** (mínimo 3 pessoas). Ninguém tira a si mesmo e nem o organizador vê os pares.
 5. Cada pessoa abre o grupo e **gira a roleta**: recebe um amigo aleatório e um tema aleatório (nunca o próprio), mais as regras do amigo.
 
-Sem login: a identidade fica salva no navegador. Cada pessoa tem um **link pessoal** (e o organizador um link de organizador) para abrir em outro aparelho.
+Sem login: cada pessoa cria um **PIN de 4 números** e entra de qualquer aparelho com nick + PIN. O organizador tem o próprio PIN. Depois de 5 PINs errados, o acesso trava por 15 minutos.
 
 ## Configurar o Supabase
 

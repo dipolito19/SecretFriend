@@ -142,3 +142,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
 }
 .wishlist.plain li::before { content: "🎁 "; }
 .chip.theme-chip { background: #e7f0e6; border-color: #cfe1cd; color: var(--green); font-weight: 600; }
+.pin { max-width: 140px; letter-spacing: 0.4em; font-size: 20px; text-align: center; }
+.linkish { background: none; color: var(--red); padding: 0; font-weight: 600; text-decoration: underline; }
+.linkish:hover { background: none; color: var(--red-dark); }

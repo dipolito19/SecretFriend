@@ -52,11 +52,12 @@ export function buildView(group: Group, people: Participant[], token: string | n
     eventDate: group.event_date,
     drawn: !!group.drawn_at,
     isAdmin: !!admin && admin === group.admin_token,
+    hasAdminPin: !!admin && admin === group.admin_token && !!group.admin_pin_hash,
     participants: people.map((p) => ({ id: p.id, nick: p.nick })),
     themesRevealed: !!group.themes_revealed_at,
     // So o organizador revela o pote. Ordem alfabetica: a ordem de cadastro entregaria quem escreveu cada tema.
     themes: !group.themes_revealed_at ? [] : people.map((p) => p.theme).filter(Boolean).sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" })),
-    me: me ? { id: me.id, nick: me.nick, theme: me.theme, avoid: me.avoid } : null,
+    me: me ? { id: me.id, nick: me.nick, theme: me.theme, avoid: me.avoid, hasPin: !!me.pin_hash } : null,
     match:
       me && target
         ? { id: target.id, nick: target.nick, avoid: target.avoid, theme: me.assigned_theme ?? "" }
